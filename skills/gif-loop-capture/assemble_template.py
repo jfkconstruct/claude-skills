@@ -1,4 +1,9 @@
-"""Assemble captured frames into an animated webp (gif-loop-capture skill)."""
+"""Assemble captured frames into an animated loop (gif-loop-capture skill).
+
+Output format follows the extension: .webp (default), .gif (PIL), .mp4 (ffmpeg on PATH).
+"""
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from PIL import Image
@@ -20,8 +25,23 @@ def cover(im, tw, th):
 
 frames = [cover(Image.open(p).convert("RGB"), *TARGET)
           for p in sorted(FRAMES_DIR.glob("frame_*.png"))]
-frames[0].save(OUT, save_all=True, append_images=frames[1:],
-               duration=DURATION_MS, loop=0, quality=QUALITY, method=4)
+if OUT.suffix.lower() == ".mp4":
+    if not shutil.which("ffmpeg"):
+        sys.exit("mp4 output needs ffmpeg on PATH")
+    tmp = OUT.parent / "_mp4_frames"
+    tmp.mkdir(exist_ok=True)
+    for i, f in enumerate(frames):
+        f.save(tmp / f"f_{i:03d}.png")
+    subprocess.run(["ffmpeg", "-y", "-framerate", str(round(1000 / DURATION_MS)), "-i", str(tmp / "f_%03d.png"),
+                    "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-pix_fmt", "yuv420p", str(OUT)], check=True)
+    shutil.rmtree(tmp)
+    print(f"{OUT} {OUT.stat().st_size / 1024:.1f} KB mp4 frames={len(frames)}")
+    sys.exit(0)
+elif OUT.suffix.lower() == ".gif":
+    frames[0].save(OUT, save_all=True, append_images=frames[1:], duration=DURATION_MS, loop=0, optimize=True)
+else:
+    frames[0].save(OUT, save_all=True, append_images=frames[1:],
+                   duration=DURATION_MS, loop=0, quality=QUALITY, method=4)
 
 check = Image.open(OUT)
 kb = OUT.stat().st_size / 1024

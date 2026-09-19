@@ -17,8 +17,7 @@ Copy any folder from `skills/` into `.claude/skills/`
 
 | Skill | What it does | Trigger |
 |-------|-------------|---------|
-| **ui-audit** | Comprehensive UI/UX audit with hard ship gates, scoring framework, and actionable recommendations | When shipping a screen or component |
-| **ui-patterns** | Pattern library, screen-type requirements, and disclosure rules | Loaded before ui-audit |
+| **ui-audit** | UI/UX audit: locate the failure in the causal chain, score 0-5, bounce on a hard ship gate. Ships with its pattern library (`ui-patterns.md`) | When shipping a screen or component |
 | **self-critique** | Structured critique pass on any draft, document, or skill: find the weakest claim, fix it, repeat | Before finalizing work |
 | **ship-learn-next** | Turn a tutorial, transcript, or article into a ship-first plan of concrete reps | When you finish learning material |
 | **session-story** | Extract session stories and structural decisions from build transcripts | End of session |

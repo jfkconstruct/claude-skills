@@ -1,7 +1,7 @@
 """Frame-burst capture template (gif-loop-capture skill).
 
 Per-target knobs: URL, SELECTOR, how-to-reach-motion block, N_FRAMES, INTERVAL_MS.
-Run under plain `python` (playwright + Pillow installed on this box).
+Setup: pip install playwright pillow; python -m playwright install chromium.
 """
 import time
 from pathlib import Path
@@ -10,8 +10,10 @@ from playwright.sync_api import sync_playwright
 WORKDIR = Path(__file__).parent
 FRAMES_DIR = WORKDIR / "frames"
 FRAMES_DIR.mkdir(exist_ok=True)
+for old in FRAMES_DIR.glob("frame_*.png"):
+    old.unlink()  # a shorter recapture must not inherit stale frames
 
-URL = "http://127.0.0.1:8091/games/TARGET.html"
+URL = "http://127.0.0.1:8091/TARGET.html"  # served with: python -m http.server 8091 --bind 127.0.0.1
 SELECTOR = "canvas"          # the game surface; fall back to clipped page.screenshot
 N_FRAMES = 32
 INTERVAL_MS = 140

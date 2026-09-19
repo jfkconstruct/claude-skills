@@ -15,7 +15,7 @@ Score every screen 0-5:
 | **Accessibility** | 1.2 | Is it usable for everyone? (contrast, targets, etc.) |
 | **Conversion Strength** | 1.3 | How compelling is the CTA presentation? |
 
-- **Grayscale hierarchy pass:** review the screen with color removed; two reviewers must agree on the first, second, and third attention target. Judgment, not a scan. (app-ui-1-percent-v2.1.md, grayscale pass)
+- **Grayscale hierarchy pass:** review the screen with color removed; two reviewers must agree on the first, second, and third attention target. Judgment, not a scan.
 
 ---
 
@@ -41,8 +41,8 @@ Score every screen 0-5:
 | Command Palette | Power users, productivity apps |
 | Floating Action Button | Single primary action per screen |
 
-- **Navigation role separation:** tab bars hold destinations only; toolbars hold actions on the current context; menus hold secondary actions. A destination in a toolbar or an action in a tab bar is a finding. (app-ui-1-percent-v2.1.md, navigation roles)
-- **Window-class adaptive rule:** design compact, medium, and expanded compositions; navigation transforms across them (tabs to rail to multi-pane). Distinct from the safe-area section below. (app-ui-1-percent-v2.1.md, window classes)
+- **Navigation role separation:** tab bars hold destinations only; toolbars hold actions on the current context; menus hold secondary actions. A destination in a toolbar or an action in a tab bar is a finding.
+- **Window-class adaptive rule:** design compact, medium, and expanded compositions; navigation transforms across them (tabs to rail to multi-pane). Distinct from the safe-area section below.
 
 **Nav labels are predictable before the click.** Generic nouns a stranger can decode (Work, Writing, About), never private names (a product, a series, a "lab"). Private names go inside a section, not on its door; the hero teaches them. Same rule one level down: every card, link, and page title reads what it is, why you should care, then its name (`<plain descriptor> [outcome] · <Name>`); the name is the last word, never the first. Test: cover the site and ask what is behind each label. One content type per section: writing in one place, products in one place, no matter how many source sites got merged.
 
@@ -81,7 +81,7 @@ Score every screen 0-5:
 - 1s+: Skeleton screen
 - 3s+: Progress bar with estimate
 
-- **Reversibility over confirmation:** undo for anything reversible; a confirm dialog only for severe, irreversible, expensive, or security-sensitive actions. (app-ui-1-percent-v2.1.md, reversibility)
+- **Reversibility over confirmation:** undo for anything reversible; a confirm dialog only for severe, irreversible, expensive, or security-sensitive actions.
 
 ### Commerce
 | Pattern | When to Use |
@@ -101,7 +101,7 @@ Score every screen 0-5:
 2. Secondary: Outlined or ghost
 3. Tertiary: Text link
 
-- **Decisions, not screens, are the atomic design unit:** write "to decide X the user must know A, B, C and be able to do D, E", then compose the screen from those. (ui-problem-decomposition-v2.1.md, decisions not screens)
+- **Decisions, not screens, are the atomic design unit:** write "to decide X the user must know A, B, C and be able to do D, E", then compose the screen from those.
 
 ---
 

@@ -1,10 +1,5 @@
 ---
 name: self-critique
-description: Real-time model critique loop for identifying reasoning flaws before output.
----
-
----
-name: self-critique
 description: "Systematically critique and improve any output, document, or skill. Use when: reviewing your own work, improving a draft, stress-testing a framework, or iterating on anything that needs to be better. Triggers: 'critique this', 'what's wrong with this', 'how can I improve this', 'review my work', 'iterate on this'."
 ---
 
@@ -165,8 +160,8 @@ Tearing down without building up. Always pair problems with solutions.
 ## Integration
 
 This skill pairs with:
-- **idea-expander** → Expand first, then critique
-- **flowcraft** → Critique catches what flowcraft polishes
+- An expansion pass first (widen the idea), then critique
+- A polish pass after (critique catches what polish hides)
 - Any output that needs iteration before shipping
 
 ---

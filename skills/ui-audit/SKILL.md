@@ -10,15 +10,15 @@ Perform a comprehensive UI/UX audit and generate actionable recommendations.
 ## Required Skills
 
 Always load these skills before running an audit:
-- `ui-patterns.md` - Pattern library, screen-type requirements, progressive disclosure definitions
+- `ui-patterns.md` - Pattern library and screen-type requirements
 - This file (heuristics, checklist, scoring)
 
 The patterns skill provides the "what good looks like" reference. This skill provides the scoring framework. Both are needed for a complete audit.
 
 ## Process
 
-1. **Load skills** - Read ui-patterns.md and ui-audit.md before starting
-2. **Explore UI codebase** - Find SwiftUI views, React components, style files
+1. **Load the pattern library** - Read ui-patterns.md before starting
+2. **Explore UI codebase** - Find the views or components and the style files (web, SwiftUI, or any other UI stack)
 3. **Match screen type** - Use Pattern Selection table from ui-patterns to identify required patterns
 4. **Locate the failure, then score** - Walk the causal chain BEFORE any number: outcome, user model, mental model, findability, comprehension, affordance, accessibility, feedback, recovery, real-world result, verification. Name the first link that breaks; that is the finding. Then rate each screen/component 0-5. A score with no located cause is unactionable.
 5. **Check pattern coverage** - Verify required patterns for the screen type are present
@@ -26,6 +26,8 @@ The patterns skill provides the "what good looks like" reference. This skill pro
 7. **Categorize by effort** - Quick wins, medium effort, structural changes
 
 ## Heuristics (Score 0-5)
+
+Anchors: 0 absent or broken; 1 present but fails most users; 2 works for the happy path only; 3 works, with visible friction; 4 good, one minor gap; 5 nothing to fix. Overall score = weighted mean of the scored heuristics; N/A rows are excluded from the mean, never counted as 0. A claim you could not verify (no device, no user) scores no higher than 3 and says so.
 
 | Heuristic | Weight | Question |
 |-----------|--------|----------|
@@ -83,7 +85,7 @@ Regardless of the weighted total, a critical flow scoring 0 or 1 on any of Acces
 **Regression**
 - [ ] Novice, expert, mobile, keyboard-only, screen reader, offline, interrupted mid-task, permission denied, destructive action each walked once
 
-**Responsive Scaling**
+**Responsive Scaling** (web; on native, substitute Dynamic Type or the platform's text scaling)
 - [ ] Root font-size uses `clamp()` or responsive scaling (not fixed 16px)
 - [ ] No `text-xs` (12px) for body content; minimum readable size is `text-sm` (14px)
 - [ ] Tailwind breakpoint prefixes (`md:`, `lg:`, `xl:`) used for text and spacing on key elements

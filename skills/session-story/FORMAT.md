@@ -1,13 +1,12 @@
-# Session story format (locked 2026-07-31)
+# Story file format
 
-Locked against the live worked example `examples/2026-07-31-rung2-gifs.md`; change this file only with a dated reason and re-verify the example still conforms.
 
 ```markdown
 ---
 date: YYYY-MM-DD
 slug: kebab-case-short
 arc: one sentence, what changed in the world by session end
-repos: [@<repo> @ <hash>, <other repo> @ <hash>]
+repos: ["<repo>@<hash>", "<other-repo>@<hash>"]
 post-candidates: [which content pillar(s) this could feed: identity | capability | contribution]
 status: raw
 ---
