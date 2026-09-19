@@ -29,11 +29,11 @@ from pathlib import Path
 # Each kind is a regex over the claim. A match must appear verbatim in the evidence text.
 KINDS: dict[str, re.Pattern[str]] = {
     "date": re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),
-    "url": re.compile(r"https?://[^\s)\]>\"']+"),
+    "url": re.compile(r"https?://[^\s)\]>\"']+"),  # trailing .,;:!? stripped in verify
     "ref": re.compile(r"(?<![\w/])#\d+\b|\b[A-Z][A-Z0-9]{1,9}-\d+\b"),
-    "hash": re.compile(r"\b[0-9a-f]{7,40}\b"),
+    "hash": re.compile(r"\b[0-9a-fA-F]{7,40}\b"),
     "path": re.compile(r"(?<![\w.])(?:[\w.-]+/)+[\w.-]+\.[A-Za-z0-9]{1,8}\b"),
-    "number": re.compile(r"(?<![\w.-])\d+(?:\.\d+)?%?(?![\w.-])"),
+    "number": re.compile(r"(?<![\w.-])-?\d+(?:\.\d+)?%?(?![\w-])(?!\.\d)"),
 }
 DEFAULT_KINDS = ("date", "url", "ref", "hash")
 
@@ -46,15 +46,17 @@ def load_evidence(paths: list[Path], exclude_keys: tuple[str, ...] = DEFAULT_EXC
     """Serialize every evidence file into one grounding string.
 
     JSON files drop the excluded top-level keys first; every other file is read as text.
+    A .json file that does not parse raises ValueError: the gate fails closed, because
+    keeping the raw text would let an excluded key ground the claim.
     """
     parts: list[str] = []
     for path in paths:
-        text = path.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8-sig")
         if path.suffix.lower() == ".json":
             try:
                 data = json.loads(text)
-            except json.JSONDecodeError:
-                data = None
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"{path}: not valid JSON ({exc.msg} at line {exc.lineno})") from exc
             if isinstance(data, dict):
                 data = {k: v for k, v in data.items() if k not in exclude_keys}
                 text = json.dumps(data, ensure_ascii=False, default=str)
@@ -73,7 +75,10 @@ def verify(claim: str, evidence: str, kinds: tuple[str, ...] = DEFAULT_KINDS,
         if pattern is None:
             reasons.append(f"unknown kind: {kind}")
             continue
-        for token in sorted(set(pattern.findall(claim))):
+        tokens = pattern.findall(claim)
+        if kind == "url":
+            tokens = [t.rstrip(".,;:!?") for t in tokens]
+        for token in sorted(set(tokens)):
             if token not in evidence:
                 reasons.append(f"{kind} not in evidence: {token}")
     for rx in require or []:
@@ -116,10 +121,19 @@ def main(argv: list[str] | None = None) -> int:
     if unknown:
         print(f"unknown kinds: {', '.join(unknown)}", file=sys.stderr)
         return 2
+    for rx in args.require:
+        try:
+            re.compile(rx)
+        except re.error as exc:
+            print(f"bad --require regex {rx!r}: {exc}", file=sys.stderr)
+            return 2
     try:
-        claim = args.claim.read_text(encoding="utf-8")
+        claim = args.claim.read_text(encoding="utf-8-sig")
         evidence = load_evidence(args.evidence, tuple(args.exclude_key))
-    except OSError as exc:
+        # Read the fallback before any verdict is ledgered: a ledger row saying
+        # "recovered" must never exist without the artifact that recovery emits.
+        fallback = args.fallback.read_text(encoding="utf-8-sig") if args.fallback else None
+    except (OSError, ValueError) as exc:
         print(f"cannot read: {exc}", file=sys.stderr)
         return 2
 
@@ -135,8 +149,8 @@ def main(argv: list[str] | None = None) -> int:
     print("REJECTED", file=sys.stderr)
     for reason in reasons:
         print(f"  - {reason}", file=sys.stderr)
-    if args.fallback:
-        sys.stdout.write(args.fallback.read_text(encoding="utf-8"))
+    if fallback is not None:
+        sys.stdout.write(fallback)
     return 1
 
 

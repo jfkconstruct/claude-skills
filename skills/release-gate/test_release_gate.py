@@ -50,6 +50,42 @@ def test_excluded_keys_never_ground(tmp_path):
     assert verify("Read #9.", ev) == []
 
 
+# invented url or hash released (R7: each default kind gets its own rejection check)
+def test_invented_url_and_hash_are_rejected():
+    assert verify("See https://example.org/x.", "https://example.org/y") == [
+        "url not in evidence: https://example.org/x"
+    ]
+    assert verify("Commit ABCDEF1.", "no commits") == ["hash not in evidence: ABCDEF1"]
+
+
+# grounded url with trailing prose punctuation falsely rejected (R4)
+def test_url_trailing_punctuation_is_stripped():
+    assert verify("See https://example.org/docs.", "https://example.org/docs") == []
+    assert verify("(https://example.org/docs), then https://example.org/docs!", "https://example.org/docs") == []
+
+
+# integers before a period and negative numbers slip past the number kind (R2)
+def test_number_edge_cases():
+    assert verify("Count is 42.", "no numbers", ("number",)) == ["number not in evidence: 42"]
+    assert verify("Delta -42 today", "no numbers", ("number",)) == ["number not in evidence: -42"]
+    assert verify("Rate 3.5% on 2026-09-19", "2026-09-19", ("number",)) == ["number not in evidence: 3.5%"]
+
+
+# unparseable JSON evidence keeps its excluded keys and grounds the claim (R1: fail closed)
+def test_bad_json_evidence_fails_closed(tmp_path):
+    p = tmp_path / "facts.json"
+    p.write_text('{"history": "#99",', encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_evidence([p])
+
+
+# BOM-prefixed JSON parsed, excluded keys still dropped (R1)
+def test_bom_json_still_excludes_keys(tmp_path):
+    p = tmp_path / "facts.json"
+    p.write_bytes(b"\xef\xbb\xbf" + b'{"history": "#99", "pending": ["#1"]}')
+    assert verify("Ship #99.", load_evidence([p])) == ["ref not in evidence: #99"]
+
+
 # required item unnamed
 def test_require_pattern():
     assert verify("Nothing to read.", "pending /view/5", require=[r"/view/\d+"]) == [
@@ -102,6 +138,24 @@ def test_cli_verified_prints_claim(tmp_path):
         capture_output=True, text=True,
     )
     assert run.returncode == 0 and run.stdout == "Ship #1."
+
+
+# bad --require regex, missing fallback, bad JSON: usage error, nothing released, nothing ledgered (R5, R6)
+@pytest.mark.parametrize("extra", [
+    ["--require", "["],
+    ["--fallback", "missing.md"],
+])
+def test_usage_errors_exit_2_without_ledger(tmp_path, extra):
+    claim = tmp_path / "claim.md"
+    claim.write_text("Ship #99.", encoding="utf-8")
+    facts = facts_json(tmp_path, {})
+    ledger = tmp_path / "gate.jsonl"
+    run = subprocess.run(
+        [sys.executable, str(HERE / "release_gate.py"), "--claim", str(claim), "--evidence", str(facts),
+         "--ledger", str(ledger)] + extra,
+        capture_output=True, text=True, cwd=tmp_path,
+    )
+    assert run.returncode == 2 and run.stdout == "" and not ledger.exists()
 
 
 # unknown kind fails loudly, never releases

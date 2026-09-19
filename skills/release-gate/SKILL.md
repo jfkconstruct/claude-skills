@@ -64,7 +64,10 @@ verifier that cannot be talked into anything, because it is not a model.
    ```
 
    Exit 0 prints the claim (release). Exit 1 prints the fallback and lists every
-   ungrounded token on stderr (recover). Exit 2 is a usage error and releases nothing.
+   ungrounded token on stderr (recover). Exit 2 is a usage error (unknown kind, bad
+   `--require` regex, unreadable file, a `.json` evidence file that does not parse) and
+   releases nothing, ledgers nothing. The gate fails closed: unparseable JSON is never kept
+   as raw text, because that would let an excluded key ground the claim.
 4. **Recover to the fallback, never retry.** A retry re-runs the producer that just
    invented something, with the same inputs and the same incentive. The fallback is the
    same path an empty producer response already takes, so recovery costs no new code.
@@ -81,11 +84,11 @@ verifier that cannot be talked into anything, because it is not a model.
 | Kind | Matches | Default |
 |---|---|---|
 | `date` | `YYYY-MM-DD` | on |
-| `url` | `http://` or `https://` up to whitespace or a closing bracket | on |
+| `url` | `http://` or `https://` up to whitespace or a closing bracket; trailing `.,;:!?` dropped | on |
 | `ref` | `#123`, `ABC-123` (ticket style) | on |
-| `hash` | 7 to 40 hex characters (commits, content hashes) | on |
+| `hash` | 7 to 40 hex characters, either case (commits, content hashes) | on |
 | `path` | `dir/file.ext` | off |
-| `number` | bare integers, decimals, percents | off |
+| `number` | bare integers, negatives, decimals, percents | off |
 
 `path` and `number` are opt-in (`--kinds date,url,ref,hash,path,number`) because prose
 carries numbers and paths that were never meant as citations; turn them on for
@@ -126,10 +129,13 @@ write_brief(claim)                            # the only side effect, after the 
 
 ## Tests
 
-`python -m pytest test_release_gate.py -q` runs the risk register: invented ref, invented
-date, grounded claim passes, excluded keys never ground, required pattern, empty claim,
-opt-in kinds stay off, CLI rejects to fallback and ledgers the claim, CLI passes a verified
-claim through unchanged, unknown kind fails loudly.
+`python -m pytest test_release_gate.py -q` runs the risk register (17 cases): invented
+ref, date, URL, and hash each rejected; grounded claim passes; excluded keys never
+ground; unparseable or BOM-prefixed JSON evidence fails closed; URL trailing punctuation
+does not cause a false rejection; number edge cases (before a period, negative, percent);
+required pattern; empty claim; opt-in kinds stay off; CLI rejects to fallback and ledgers
+the claim; CLI passes a verified claim through unchanged; bad regex, missing fallback, and
+unknown kind exit 2 with nothing released and nothing ledgered.
 
 Open risk, waived until the ledger has rows: correct-but-unusual output (a real date the
 collector did not capture) reads as a false rejection. The ledger is where you find it.
