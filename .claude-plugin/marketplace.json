@@ -1,0 +1,13 @@
+{
+  "name": "jfkconstruct-skills",
+  "owner": {
+    "name": "jfkconstruct"
+  },
+  "plugins": [
+    {
+      "name": "build-skills",
+      "source": "./",
+      "description": "UI/UX audit, self-critique, ship-learn-next, session-story, gif-loop-capture"
+    }
+  ]
+}

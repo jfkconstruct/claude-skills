@@ -1,0 +1,5 @@
+{
+  "name": "build-skills",
+  "version": "0.1.0",
+  "description": "Five build-and-learn skills for Claude Code: a UI/UX audit with a hard ship gate, a self-critique loop, a learn-to-reps planner, a build-session story extractor, and an HTML-to-animated-loop capture."
+}
